@@ -1,0 +1,10 @@
+en:
+  site_settings:
+    chat_channel_message_counts_enabled: "Enable the cached chat channel message counts API."
+    chat_channel_message_counts_cache_ttl_seconds: "How long fresh chat channel message counts stay cached, in seconds. Minimum is 12 hours."
+    chat_channel_message_counts_stale_ttl_seconds: "How long stale chat channel message counts can be served if refresh fails, in seconds."
+    chat_channel_message_counts_rate_limit_per_minute: "Maximum requests per minute per user for the chat channel message counts API."
+
+  chat_channel_message_counts:
+    disabled: "The chat channel message counts API is disabled."
+    chat_disabled: "Chat is disabled."

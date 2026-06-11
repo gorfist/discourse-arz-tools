@@ -1,0 +1,19 @@
+plugins:
+  chat_channel_message_counts_enabled:
+    default: true
+    client: false
+  chat_channel_message_counts_cache_ttl_seconds:
+    default: 43200
+    min: 43200
+    max: 2592000
+    client: false
+  chat_channel_message_counts_stale_ttl_seconds:
+    default: 604800
+    min: 43200
+    max: 2592000
+    client: false
+  chat_channel_message_counts_rate_limit_per_minute:
+    default: 30
+    min: 1
+    max: 300
+    client: false

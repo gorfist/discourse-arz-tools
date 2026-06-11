@@ -1,0 +1,10 @@
+fa_IR:
+  site_settings:
+    chat_channel_message_counts_enabled: "فعال کردن API کش شده شمارش پیام های کانال های گفتگو."
+    chat_channel_message_counts_cache_ttl_seconds: "مدت زمان معتبر بودن شمارش تازه پیام های کانال های گفتگو در کش، بر حسب ثانیه. حداقل ۱۲ ساعت است."
+    chat_channel_message_counts_stale_ttl_seconds: "مدت زمانی که در صورت خطای به روزرسانی می توان شمارش قدیمی پیام های کانال های گفتگو را ارائه کرد، بر حسب ثانیه."
+    chat_channel_message_counts_rate_limit_per_minute: "حداکثر درخواست در هر دقیقه برای هر کاربر در API شمارش پیام های کانال های گفتگو."
+
+  chat_channel_message_counts:
+    disabled: "API شمارش پیام های کانال های گفتگو غیرفعال است."
+    chat_disabled: "گفتگو غیرفعال است."
