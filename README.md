@@ -1,16 +1,39 @@
-# Discourse Chat Channel Message Counts
+# discourse-arz-tools
 
-Backend-only Discourse plugin that exposes cached message counts for public chat channels.
+Backend-only Discourse plugin with Arzdigital API utilities:
 
-The endpoint is designed for overloaded Discourse instances: regular API requests never run the grouped `COUNT(*)` query. A scheduled job refreshes a global cache every 12 hours, and requests only filter the cached map down to public chat channels visible to the authenticated user.
+- cached message counts for public chat channels
+- performance-tuned API topic view tracking for selected `/t/...json` topic requests
 
-## Endpoint
+Repository: https://github.com/gorfist/discourse-arz-tools
+
+## Installation
+
+Add this plugin to your Discourse `app.yml`:
+
+```yaml
+hooks:
+  after_code:
+    - exec:
+        cd: $home/plugins
+        cmd:
+          - git clone https://github.com/gorfist/discourse-arz-tools.git
+```
+
+Then rebuild Discourse:
+
+```sh
+cd /var/discourse
+./launcher rebuild app
+```
+
+## Chat Channel Message Counts
 
 ```http
 GET /chat/api/channel-message-counts.json
 ```
 
-The endpoint requires a logged-in Discourse user. Browser sessions work, and external clients can use the normal Discourse API headers:
+The endpoint requires a logged-in Discourse user. Browser sessions work, and external clients can use normal Discourse API headers:
 
 ```sh
 curl \
@@ -32,41 +55,36 @@ Example response:
 }
 ```
 
-## Load Safety
+### Chat Count Load Safety
 
 - API requests only read cache and resolve visible public chat channels.
-- The heavy grouped count query runs only from `Jobs::RefreshChatChannelMessageCounts`.
+- The grouped `COUNT(*)` query runs only from `Jobs::RefreshDiscourseArzToolsChatChannelMessageCounts`.
 - Counts are cached under a fresh key for at least 12 hours.
 - A stale fallback key is retained for 7 days by default.
 - A distributed mutex prevents concurrent refresh jobs from running the count query together.
 - Per-user rate limiting is enabled for the endpoint.
 - Direct messages and group direct messages are never returned.
 
-Until the first scheduled refresh completes, the endpoint returns an empty `counts` map with `cached_at: null` rather than pretending every channel has zero messages. To prefill the cache deliberately during a quiet window, run this from the Discourse root:
+Until the first scheduled refresh completes, the endpoint returns an empty `counts` map with `cached_at: null`.
+
+To prefill the cache during a quiet window:
 
 ```sh
-RAILS_ENV=production bundle exec rails runner 'Jobs::RefreshChatChannelMessageCounts.new.execute'
+RAILS_ENV=production bundle exec rails runner 'Jobs::RefreshDiscourseArzToolsChatChannelMessageCounts.new.execute'
 ```
 
-## Settings
-
-- `chat_channel_message_counts_enabled`: enable or disable the plugin.
-- `chat_channel_message_counts_cache_ttl_seconds`: fresh cache TTL. Default `43200`, minimum `43200`.
-- `chat_channel_message_counts_stale_ttl_seconds`: stale fallback cache TTL. Default `604800`.
-- `chat_channel_message_counts_rate_limit_per_minute`: per-user endpoint limit. Default `30`.
-
-## Recommended Index
+### Recommended Chat Message Index
 
 For large `chat_messages` tables, check the recommended partial index before enabling the scheduled job:
 
 ```sh
-rake chat_channel_message_counts:check_index
+rake discourse_arz_tools:chat_channel_message_counts:check_index
 ```
 
 If it is missing, create it during a quiet maintenance window:
 
 ```sh
-rake chat_channel_message_counts:create_index
+rake discourse_arz_tools:chat_channel_message_counts:create_index
 ```
 
 The task uses:
@@ -77,6 +95,62 @@ ON chat_messages (chat_channel_id)
 WHERE deleted_at IS NULL;
 ```
 
+## API Topic Views
+
+This feature counts eligible API topic responses as topic views. It is based on the behavior from `gorfist/api-topic-views`, merged into `discourse-arz-tools` with request-side load controls.
+
+It hooks into `TopicsController#show` and enqueues `Jobs::DiscourseArzToolsTrackApiTopicView` only when:
+
+- `discourse_arz_tools_enabled` is true
+- `discourse_arz_tools_api_topic_views_enabled` is true
+- the response status is `200`
+- the request uses Discourse API or User API authentication
+- a topic id can be resolved from `@topic`, `params[:topic_id]`, or `params[:id]`
+- the optional required header is present, when configured
+- the request is not over the per-IP/per-topic rate limit, when configured
+
+The increment itself is a single atomic SQL update against non-deleted topics. User visits are tracked only after a view increment succeeds and only for non-bot users.
+
+Example:
+
+```sh
+curl \
+  -H "Api-Key: YOUR_KEY" \
+  -H "Api-Username: USERNAME" \
+  https://forum.example.com/t/topic-slug/123.json
+```
+
+### API Topic View Load Safety
+
+- Non-API requests are ignored before any job is enqueued.
+- Non-200 responses are ignored.
+- Bot users are ignored.
+- Optional header gating lets you limit counting to trusted API clients.
+- Optional per-IP/per-topic rate limiting runs before Sidekiq enqueue, so bursts do not create avoidable background jobs.
+- The background job increments `topics.views` with one `UPDATE`, without loading and saving the full topic record.
+- Success logging is debug-only via `DISCOURSE_ARZ_TOOLS_DEBUG=true`.
+
+If `discourse_arz_tools_api_topic_views_require_header` is set to `X-Count-As-View`, clients must include it:
+
+```sh
+curl \
+  -H "Api-Key: YOUR_KEY" \
+  -H "Api-Username: USERNAME" \
+  -H "X-Count-As-View: true" \
+  https://forum.example.com/t/topic-slug/123.json
+```
+
+## Settings
+
+- `discourse_arz_tools_enabled`: master switch for the plugin.
+- `discourse_arz_tools_chat_channel_message_counts_enabled`: enable or disable the cached chat channel message counts API.
+- `discourse_arz_tools_chat_channel_message_counts_cache_ttl_seconds`: fresh chat count cache TTL. Default `43200`, minimum `43200`.
+- `discourse_arz_tools_chat_channel_message_counts_stale_ttl_seconds`: stale chat count fallback cache TTL. Default `604800`.
+- `discourse_arz_tools_chat_channel_message_counts_rate_limit_per_minute`: per-user chat count endpoint limit. Default `30`.
+- `discourse_arz_tools_api_topic_views_enabled`: enable API topic view tracking.
+- `discourse_arz_tools_api_topic_views_require_header`: optional header required before API topic views are counted.
+- `discourse_arz_tools_api_topic_views_max_per_minute_per_ip`: maximum API topic views per minute for one IP and topic. Default `0`, disabled.
+
 ## Local Testing
 
 This standalone plugin repo can be syntax-checked locally, but request specs need to run from a full Discourse checkout with this plugin installed.
@@ -84,5 +158,5 @@ This standalone plugin repo can be syntax-checked locally, but request specs nee
 From the Discourse root:
 
 ```sh
-LOAD_PLUGINS=1 bundle exec rspec plugins/discourse-chat-channel-message-counts/spec
+LOAD_PLUGINS=1 bundle exec rspec plugins/discourse-arz-tools/spec
 ```

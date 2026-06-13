@@ -1,10 +1,14 @@
 en:
   site_settings:
-    chat_channel_message_counts_enabled: "Enable the cached chat channel message counts API."
-    chat_channel_message_counts_cache_ttl_seconds: "How long fresh chat channel message counts stay cached, in seconds. Minimum is 12 hours."
-    chat_channel_message_counts_stale_ttl_seconds: "How long stale chat channel message counts can be served if refresh fails, in seconds."
-    chat_channel_message_counts_rate_limit_per_minute: "Maximum requests per minute per user for the chat channel message counts API."
+    discourse_arz_tools_enabled: "Enable the discourse-arz-tools plugin."
+    discourse_arz_tools_chat_channel_message_counts_enabled: "Enable the cached chat channel message counts API."
+    discourse_arz_tools_chat_channel_message_counts_cache_ttl_seconds: "How long fresh chat channel message counts stay cached, in seconds. Minimum is 12 hours."
+    discourse_arz_tools_chat_channel_message_counts_stale_ttl_seconds: "How long stale chat channel message counts can be served if refresh fails, in seconds."
+    discourse_arz_tools_chat_channel_message_counts_rate_limit_per_minute: "Maximum requests per minute per user for the chat channel message counts API."
+    discourse_arz_tools_api_topic_views_enabled: "Enable API-based topic view tracking."
+    discourse_arz_tools_api_topic_views_require_header: "Optional header required to count API topic views."
+    discourse_arz_tools_api_topic_views_max_per_minute_per_ip: "Maximum API topic views per minute per IP and topic. Use 0 to disable this limiter."
 
-  chat_channel_message_counts:
+  discourse_arz_tools:
     disabled: "The chat channel message counts API is disabled."
     chat_disabled: "Chat is disabled."

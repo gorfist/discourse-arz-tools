@@ -1,13 +1,14 @@
 # frozen_string_literal: true
 
-RSpec.describe Chat::Api::ChannelMessageCountsController do
+RSpec.describe Chat::Api::DiscourseArzToolsChannelMessageCountsController do
   fab!(:user)
 
   before do
     SiteSetting.chat_enabled = true
     SiteSetting.enable_public_channels = true
     SiteSetting.chat_allowed_groups = Group::AUTO_GROUPS[:everyone]
-    SiteSetting.chat_channel_message_counts_enabled = true
+    SiteSetting.discourse_arz_tools_enabled = true
+    SiteSetting.discourse_arz_tools_chat_channel_message_counts_enabled = true
   end
 
   describe "#index" do
@@ -29,8 +30,10 @@ RSpec.describe Chat::Api::ChannelMessageCountsController do
     it "does not refresh counts from the request path" do
       sign_in(user)
 
-      expect(::DiscourseChatChannelMessageCounts::Cache).not_to receive(:refresh!)
-      expect(::DiscourseChatChannelMessageCounts::Cache).not_to receive(:refresh_if_needed!)
+      expect(::DiscourseArzTools::ChatChannelMessageCounts::Cache).not_to receive(:refresh!)
+      expect(::DiscourseArzTools::ChatChannelMessageCounts::Cache).not_to receive(
+        :refresh_if_needed!,
+      )
 
       get "/chat/api/channel-message-counts.json"
     end
@@ -44,7 +47,7 @@ RSpec.describe Chat::Api::ChannelMessageCountsController do
       Fabricate(:chat_message, chat_channel: direct_message_channel, user:)
       deleted_message.update!(deleted_at: Time.zone.now)
 
-      ::DiscourseChatChannelMessageCounts::Cache.refresh!
+      ::DiscourseArzTools::ChatChannelMessageCounts::Cache.refresh!
 
       sign_in(user)
       get "/chat/api/channel-message-counts.json"
@@ -62,7 +65,7 @@ RSpec.describe Chat::Api::ChannelMessageCountsController do
       group = Fabricate(:group)
       hidden_channel = Fabricate(:private_category_channel, group:)
 
-      ::DiscourseChatChannelMessageCounts::Cache.refresh!
+      ::DiscourseArzTools::ChatChannelMessageCounts::Cache.refresh!
 
       sign_in(user)
       get "/chat/api/channel-message-counts.json"
@@ -85,7 +88,7 @@ RSpec.describe Chat::Api::ChannelMessageCountsController do
 
     it "rate limits excessive calls" do
       RateLimiter.enable
-      SiteSetting.chat_channel_message_counts_rate_limit_per_minute = 1
+      SiteSetting.discourse_arz_tools_chat_channel_message_counts_rate_limit_per_minute = 1
       sign_in(user)
 
       get "/chat/api/channel-message-counts.json"

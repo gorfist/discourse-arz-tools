@@ -1,19 +1,40 @@
 plugins:
-  chat_channel_message_counts_enabled:
+  discourse_arz_tools_enabled:
+    type: bool
     default: true
     client: false
-  chat_channel_message_counts_cache_ttl_seconds:
+  discourse_arz_tools_chat_channel_message_counts_enabled:
+    type: bool
+    default: true
+    client: false
+  discourse_arz_tools_chat_channel_message_counts_cache_ttl_seconds:
+    type: integer
     default: 43200
     min: 43200
     max: 2592000
     client: false
-  chat_channel_message_counts_stale_ttl_seconds:
+  discourse_arz_tools_chat_channel_message_counts_stale_ttl_seconds:
+    type: integer
     default: 604800
     min: 43200
     max: 2592000
     client: false
-  chat_channel_message_counts_rate_limit_per_minute:
+  discourse_arz_tools_chat_channel_message_counts_rate_limit_per_minute:
+    type: integer
     default: 30
     min: 1
     max: 300
+    client: false
+  discourse_arz_tools_api_topic_views_enabled:
+    type: bool
+    default: true
+    client: false
+  discourse_arz_tools_api_topic_views_require_header:
+    type: string
+    default: ""
+    client: false
+  discourse_arz_tools_api_topic_views_max_per_minute_per_ip:
+    type: integer
+    default: 0
+    min: 0
     client: false

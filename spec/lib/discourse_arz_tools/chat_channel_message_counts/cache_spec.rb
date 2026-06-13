@@ -1,13 +1,14 @@
 # frozen_string_literal: true
 
-RSpec.describe DiscourseChatChannelMessageCounts::Cache do
+RSpec.describe DiscourseArzTools::ChatChannelMessageCounts::Cache do
   fab!(:user)
 
   before do
     SiteSetting.chat_enabled = true
     SiteSetting.enable_public_channels = true
     SiteSetting.chat_allowed_groups = Group::AUTO_GROUPS[:everyone]
-    SiteSetting.chat_channel_message_counts_enabled = true
+    SiteSetting.discourse_arz_tools_enabled = true
+    SiteSetting.discourse_arz_tools_chat_channel_message_counts_enabled = true
     described_class.clear!
   end
 

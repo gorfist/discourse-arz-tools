@@ -1,10 +1,14 @@
 fa_IR:
   site_settings:
-    chat_channel_message_counts_enabled: "فعال کردن API کش شده شمارش پیام های کانال های گفتگو."
-    chat_channel_message_counts_cache_ttl_seconds: "مدت زمان معتبر بودن شمارش تازه پیام های کانال های گفتگو در کش، بر حسب ثانیه. حداقل ۱۲ ساعت است."
-    chat_channel_message_counts_stale_ttl_seconds: "مدت زمانی که در صورت خطای به روزرسانی می توان شمارش قدیمی پیام های کانال های گفتگو را ارائه کرد، بر حسب ثانیه."
-    chat_channel_message_counts_rate_limit_per_minute: "حداکثر درخواست در هر دقیقه برای هر کاربر در API شمارش پیام های کانال های گفتگو."
+    discourse_arz_tools_enabled: "فعال کردن افزونه discourse-arz-tools."
+    discourse_arz_tools_chat_channel_message_counts_enabled: "فعال کردن API کش شده شمارش پیام های کانال های گفتگو."
+    discourse_arz_tools_chat_channel_message_counts_cache_ttl_seconds: "مدت زمان معتبر بودن شمارش تازه پیام های کانال های گفتگو در کش، بر حسب ثانیه. حداقل ۱۲ ساعت است."
+    discourse_arz_tools_chat_channel_message_counts_stale_ttl_seconds: "مدت زمانی که در صورت خطای به روزرسانی می توان شمارش قدیمی پیام های کانال های گفتگو را ارائه کرد، بر حسب ثانیه."
+    discourse_arz_tools_chat_channel_message_counts_rate_limit_per_minute: "حداکثر درخواست در هر دقیقه برای هر کاربر در API شمارش پیام های کانال های گفتگو."
+    discourse_arz_tools_api_topic_views_enabled: "فعال کردن ردیابی بازدید موضوع مبتنی بر API."
+    discourse_arz_tools_api_topic_views_require_header: "سرآیند اختیاری مورد نیاز برای شمارش بازدیدهای موضوع API."
+    discourse_arz_tools_api_topic_views_max_per_minute_per_ip: "حداکثر بازدید موضوع API در دقیقه برای هر IP و موضوع. مقدار ۰ این محدودیت را غیرفعال می کند."
 
-  chat_channel_message_counts:
+  discourse_arz_tools:
     disabled: "API شمارش پیام های کانال های گفتگو غیرفعال است."
     chat_disabled: "گفتگو غیرفعال است."
