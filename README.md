@@ -73,6 +73,25 @@ To prefill the cache during a quiet window:
 RAILS_ENV=production bundle exec rails runner 'Jobs::RefreshDiscourseArzToolsChatChannelMessageCounts.new.execute'
 ```
 
+### Troubleshooting `not_found`
+
+If the API returns Discourse's `not_found` response for `/chat/api/channel-message-counts.json`, the endpoint route was not registered during boot. Deploy the current plugin version and rebuild or restart Discourse so `plugin.rb` can register the route against `Chat::Engine`.
+
+After boot, verify the route from the Discourse container:
+
+```sh
+RAILS_ENV=production bundle exec rails routes | grep channel-message-counts
+```
+
+Then verify the API with a real API key and username:
+
+```sh
+curl \
+  -H "Api-Key: YOUR_KEY" \
+  -H "Api-Username: USERNAME" \
+  https://forum.example.com/chat/api/channel-message-counts.json
+```
+
 ### Recommended Chat Message Index
 
 For large `chat_messages` tables, check the recommended partial index before enabling the scheduled job:
