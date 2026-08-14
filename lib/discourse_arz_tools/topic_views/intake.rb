@@ -44,7 +44,7 @@ module ::DiscourseArzTools
           result =
             SCRIPT.eval(
               Discourse.redis,
-              [rate_key, dedupe_key(id, digest), PENDING_KEY],
+              namespaced_keys(rate_key, dedupe_key(id, digest), PENDING_KEY),
               [max_requests_per_minute.to_s, dedupe_seconds.to_s, id.to_s],
             )
 
@@ -108,6 +108,10 @@ module ::DiscourseArzTools
 
         def rate_key
           "#{PREFIX}:rate:#{Time.now.to_i / 60}"
+        end
+
+        def namespaced_keys(*keys)
+          keys.map { |key| Discourse.redis.namespace_key(key) }
         end
 
         def dedupe_seconds

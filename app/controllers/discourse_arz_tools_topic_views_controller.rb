@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class DiscourseArzToolsTopicViewsController < ApplicationController
+  requires_plugin ::DiscourseArzTools::PLUGIN_NAME
+
   before_action :ensure_admin_api_request
   before_action :ensure_feature_enabled
 
