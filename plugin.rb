@@ -14,6 +14,8 @@ module ::DiscourseArzTools
 end
 
 after_initialize do
+  require_relative "app/controllers/discourse_arz_tools_topic_views_controller"
+
   if defined?(::Chat::Engine)
     require_relative "app/controllers/chat/api/discourse_arz_tools_channel_message_counts_controller"
 
