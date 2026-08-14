@@ -8,6 +8,10 @@ fa_IR:
     discourse_arz_tools_api_topic_views_enabled: "فعال کردن ردیابی بازدید موضوع مبتنی بر API."
     discourse_arz_tools_api_topic_views_require_header: "سرآیند اختیاری مورد نیاز برای شمارش بازدیدهای موضوع API."
     discourse_arz_tools_api_topic_views_max_per_minute_per_ip: "حداکثر بازدید موضوع API در دقیقه برای هر IP و موضوع. مقدار ۰ این محدودیت را غیرفعال می کند."
+    discourse_arz_tools_topic_view_beacon_enabled: "فعال کردن API خصوصی و ویژه مدیر برای ثبت بازدید موضوع."
+    discourse_arz_tools_topic_view_beacon_dedupe_seconds: "مدت زمان بر حسب ثانیه تا یک بازدیدکننده بتواند بازدید دیگری برای همان موضوع ثبت کند."
+    discourse_arz_tools_topic_view_beacon_max_requests_per_minute: "حداکثر تعداد کل درخواست های ثبت بازدید موضوع در هر دقیقه."
+    discourse_arz_tools_topic_view_beacon_sql_batch_size: "حداکثر تعداد موضوع هایی که در هر دستور SQL هنگام ثبت گروهی بازدیدها به روز می شوند."
 
   discourse_arz_tools:
     disabled: "API شمارش پیام های کانال های گفتگو غیرفعال است."

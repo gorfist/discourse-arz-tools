@@ -33,6 +33,7 @@ after_initialize do
   require_relative "lib/discourse_arz_tools/chat_channel_message_counts/cache"
   require_relative "lib/discourse_arz_tools/api_topic_views/track_view_job"
   require_relative "lib/discourse_arz_tools/api_topic_views/request_logger"
+  require_relative "lib/discourse_arz_tools/topic_views/intake"
 
   ::DiscourseArzTools::ApiTopicViews::RequestLogger.register!
 end

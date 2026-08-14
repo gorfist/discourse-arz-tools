@@ -38,3 +38,25 @@ plugins:
     default: 0
     min: 0
     client: false
+  discourse_arz_tools_topic_view_beacon_enabled:
+    type: bool
+    default: false
+    client: false
+  discourse_arz_tools_topic_view_beacon_dedupe_seconds:
+    type: integer
+    default: 28800
+    min: 60
+    max: 604800
+    client: false
+  discourse_arz_tools_topic_view_beacon_max_requests_per_minute:
+    type: integer
+    default: 6000
+    min: 1
+    max: 100000
+    client: false
+  discourse_arz_tools_topic_view_beacon_sql_batch_size:
+    type: integer
+    default: 500
+    min: 1
+    max: 5000
+    client: false
