@@ -159,6 +159,71 @@ curl \
   https://forum.example.com/t/topic-slug/123.json
 ```
 
+## Batched Topic View Beacon
+
+This private endpoint lets Nexus report a real Arzdigital idea-page view without fetching the topic JSON:
+
+```http
+POST /discourse-arz-tools/topic-view.json
+```
+
+Nexus must use an admin Discourse API key. For an authenticated visitor, send the external identity derived from the trusted Nexus session:
+
+```sh
+curl -X POST \
+  -H "Api-Key: ADMIN_API_KEY" \
+  -H "Api-Username: system" \
+  -H "Content-Type: application/json" \
+  -d '{"topic_id":202277,"external_user_id":"11222"}' \
+  https://hub.arzdigital.com/discourse-arz-tools/topic-view.json
+```
+
+For a guest, send the original client IP derived from Nexus's trusted proxy chain:
+
+```json
+{
+  "topic_id": 202277,
+  "ip": "203.0.113.42"
+}
+```
+
+Never accept `external_user_id` or `ip` directly from an untrusted browser body. The browser calls Nexus; Nexus validates its session and proxy headers before calling Discourse.
+
+The first visitor/topic event within the configured eight-hour window returns:
+
+```json
+{
+  "counted": true,
+  "buffered": true
+}
+```
+
+A duplicate returns HTTP 200 without adding another pending view:
+
+```json
+{
+  "counted": false,
+  "reason": "duplicate"
+}
+```
+
+Accepted views are HMAC-deduplicated and aggregated in Redis. Raw external user IDs and IP addresses are not stored in Redis or logs. An hourly scheduled job updates topic view counts with bounded, set-based SQL, so a view can take up to one hour to appear. This endpoint does not update `TopicUser` read state.
+
+Other responses:
+
+- `403`: the plugin/beacon is disabled, the request is not API-authenticated, or the API user is not an administrator.
+- `422`: invalid topic or visitor identity input.
+- `429`: the global safety limit was reached; `Retry-After: 60` is included. Dropping analytics events is safer than creating a retry storm.
+- `503`: Redis intake is unavailable. Nexus may retry with bounded backoff.
+
+To flush buffered views manually:
+
+```sh
+RAILS_ENV=production bundle exec rake discourse_arz_tools:topic_views:flush
+```
+
+After Nexus switches to this explicit beacon, disable `discourse_arz_tools_api_topic_views_enabled` to prevent an upstream topic JSON cache refresh and an explicit browser view from both contributing views.
+
 ## Settings
 
 - `discourse_arz_tools_enabled`: master switch for the plugin.
@@ -169,6 +234,10 @@ curl \
 - `discourse_arz_tools_api_topic_views_enabled`: enable API topic view tracking.
 - `discourse_arz_tools_api_topic_views_require_header`: optional header required before API topic views are counted.
 - `discourse_arz_tools_api_topic_views_max_per_minute_per_ip`: maximum API topic views per minute for one IP and topic. Default `0`, disabled.
+- `discourse_arz_tools_topic_view_beacon_enabled`: enable the private topic view beacon. Default `false`.
+- `discourse_arz_tools_topic_view_beacon_dedupe_seconds`: visitor/topic deduplication window. Default `28800` (8 hours).
+- `discourse_arz_tools_topic_view_beacon_max_requests_per_minute`: global intake safety limit. Default `6000`.
+- `discourse_arz_tools_topic_view_beacon_sql_batch_size`: maximum topics per SQL update statement. Default `500`.
 
 ## Local Testing
 

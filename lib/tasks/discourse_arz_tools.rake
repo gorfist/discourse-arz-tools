@@ -18,4 +18,12 @@ namespace :discourse_arz_tools do
       puts "Recommended chat_messages partial index exists or was created."
     end
   end
+
+  namespace :topic_views do
+    desc "Flush buffered discourse-arz-tools topic views now"
+    task flush: :environment do
+      result = ::DiscourseArzTools::TopicViews::Flusher.flush!
+      puts "Topic view flush result: #{result}"
+    end
+  end
 end
