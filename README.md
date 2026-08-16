@@ -226,6 +226,9 @@ After Nexus switches to this explicit beacon, disable `discourse_arz_tools_api_t
 
 ## Settings
 
+See [Hub WebView Authentication](docs/superpowers/specs/2026-08-16-hub-webview-auth-design.md)
+for the direct app WebView login flow and its IDP contract.
+
 - `discourse_arz_tools_enabled`: master switch for the plugin.
 - `discourse_arz_tools_chat_channel_message_counts_enabled`: enable or disable the cached chat channel message counts API.
 - `discourse_arz_tools_chat_channel_message_counts_cache_ttl_seconds`: fresh chat count cache TTL. Default `43200`, minimum `43200`.
