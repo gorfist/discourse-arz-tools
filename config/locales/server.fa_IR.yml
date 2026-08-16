@@ -12,6 +12,9 @@ fa_IR:
     discourse_arz_tools_topic_view_beacon_dedupe_seconds: "مدت زمان بر حسب ثانیه تا یک بازدیدکننده بتواند بازدید دیگری برای همان موضوع ثبت کند."
     discourse_arz_tools_topic_view_beacon_max_requests_per_minute: "حداکثر تعداد کل درخواست های ثبت بازدید موضوع در هر دقیقه."
     discourse_arz_tools_topic_view_beacon_sql_batch_size: "حداکثر تعداد موضوع هایی که در هر دستور SQL هنگام ثبت گروهی بازدیدها به روز می شوند."
+    discourse_arz_tools_webview_auth_enabled: "فعال کردن ورود خودکار هاب با access token وب ویو اپ."
+    discourse_arz_tools_webview_auth_idp_url: "آدرس endpoint اکانت برای اعتبارسنجی access token وب ویو."
+    discourse_arz_tools_webview_auth_timeout_seconds: "حداکثر زمان انتظار هاب برای پاسخ هویت وب ویو از IDP، بر حسب ثانیه."
 
   discourse_arz_tools:
     disabled: "API شمارش پیام های کانال های گفتگو غیرفعال است."

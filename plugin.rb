@@ -15,6 +15,9 @@ end
 
 after_initialize do
   require_relative "app/controllers/discourse_arz_tools_topic_views_controller"
+  require_relative "lib/discourse_arz_tools/webview_auth/idp_client"
+  require_relative "lib/discourse_arz_tools/webview_auth/identity_resolver"
+  require_relative "lib/discourse_arz_tools/webview_auth/request_authenticator"
 
   Discourse::Application.routes.append do
     post "/discourse-arz-tools/topic-view" => "discourse_arz_tools_topic_views#create"
@@ -45,4 +48,5 @@ after_initialize do
   require_relative "app/jobs/scheduled/flush_discourse_arz_tools_topic_views"
 
   ::DiscourseArzTools::ApiTopicViews::RequestLogger.register!
+  ::DiscourseArzTools::WebviewAuth::RequestAuthenticator.register!
 end

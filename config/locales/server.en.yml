@@ -12,6 +12,9 @@ en:
     discourse_arz_tools_topic_view_beacon_dedupe_seconds: "Seconds before the same visitor can count another view for the same topic."
     discourse_arz_tools_topic_view_beacon_max_requests_per_minute: "Maximum topic view beacon requests accepted globally per minute."
     discourse_arz_tools_topic_view_beacon_sql_batch_size: "Maximum number of topics updated by each SQL statement during a buffered view flush."
+    discourse_arz_tools_webview_auth_enabled: "Enable automatic Hub login from an app WebView access token."
+    discourse_arz_tools_webview_auth_idp_url: "IDP endpoint used to validate app WebView access tokens."
+    discourse_arz_tools_webview_auth_timeout_seconds: "Maximum seconds Hub waits for the IDP WebView identity response."
 
   discourse_arz_tools:
     disabled: "The chat channel message counts API is disabled."
