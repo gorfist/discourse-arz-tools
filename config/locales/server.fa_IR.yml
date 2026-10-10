@@ -18,5 +18,6 @@ fa_IR:
     discourse_arz_tools_webview_auth_timeout_seconds: "حداکثر زمان انتظار هاب برای پاسخ هویت وب ویو از IDP، بر حسب ثانیه."
 
   discourse_arz_tools:
+    browser_login_failed: "ورود به هاب ناموفق بود. لطفاً به هاب برگردید و دوباره ورود را شروع کنید."
     disabled: "API شمارش پیام های کانال های گفتگو غیرفعال است."
     chat_disabled: "گفتگو غیرفعال است."

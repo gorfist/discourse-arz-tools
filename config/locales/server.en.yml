@@ -18,5 +18,6 @@ en:
     discourse_arz_tools_webview_auth_timeout_seconds: "Maximum seconds Hub waits for the IDP WebView identity response."
 
   discourse_arz_tools:
+    browser_login_failed: "Hub login failed. Please return to Hub and start login again."
     disabled: "The chat channel message counts API is disabled."
     chat_disabled: "Chat is disabled."

@@ -69,6 +69,28 @@ RSpec.describe DiscourseArzToolsBrowserLoginController do
     expect(cookies["_t"]).to be_blank
   end
 
+  it "shows the themed Persian error page for an invalid browser form ticket" do
+    allow(::DiscourseArzTools::BrowserLogin::TicketVerifier).to receive(:verify).and_return(nil)
+
+    post path, params: { ticket: "ticket" }, headers: headers
+
+    expect(response.status).to eq(401)
+    expect(response.media_type).to eq("text/html")
+    expect(response.body).to include("ورود به هاب ناموفق بود.")
+    expect(response.body).to include("لطفاً به هاب برگردید و دوباره ورود را شروع کنید.")
+    expect(response.body).to include('id="discourse-error"')
+    expect(response.body).to include("page-not-found")
+    expect(response.body).to include("<html")
+    expect(cookies["_t"]).to be_blank
+    expect(::DiscourseArzTools::WebviewAuth::IdentityResolver).not_to have_received(:resolve)
+
+    post path, params: { ticket: "ticket" }, headers: headers, as: :json
+
+    expect(response.status).to eq(401)
+    expect(response.media_type).to eq("application/json")
+    expect(response.parsed_body).to eq("success" => false)
+  end
+
   it "rejects tickets in the URL and the old JSON-suffixed route" do
     post "#{path}?ticket=ticket", params: {}, headers: headers, as: :json
     expect(response.status).to eq(400)

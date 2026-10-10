@@ -78,7 +78,15 @@ class DiscourseArzToolsBrowserLoginController < ApplicationController
 
   def login_error(status, form_login)
     if form_login
-      render plain: "Hub login failed. Please restart login from Hub.", status: status
+      # Use Discourse's themed error page for top-level browser navigation.
+      # Background synchronization must continue to receive JSON errors.
+      I18n.with_locale(:fa_IR) do
+        render html: build_not_found_page(
+          status: Rack::Utils.status_code(status),
+          layout: "no_ember",
+          custom_message: "discourse_arz_tools.browser_login_failed",
+        ), status: status
+      end
     else
       render json: { success: false }, status: status
     end
