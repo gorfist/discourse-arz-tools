@@ -251,3 +251,15 @@ From the Discourse root:
 ```sh
 LOAD_PLUGINS=1 bundle exec rspec plugins/discourse-arz-tools/spec
 ```
+
+## Accounts browser login synchronization
+
+Enable `discourse_arz_tools_browser_login_enabled` and DiscourseConnect with a secret matching IDP's `DISCOURSE_SSO_SECRET`.
+
+Accounts sends `POST /discourse-arz-tools/browser-login.json` with JSON `{"ticket":"<signed ticket>"}` and browser credentials. OPTIONS supports the exact `https://accounts.arzdigital.com` origin, POST and Content-Type. No Hub iframe or IDP HTTP exchange is required. Accounts CSP must permit the Hub in connect-src; proxies must preserve CORS and Set-Cookie headers.
+
+The verifier checks the purpose-derived HS256 signature, issuer, Hub audience, 60-second expiry and identity binding. Ticket verification does not store or lock tickets; a valid ticket may be reused until expiry. If the browser already has an authenticated Hub user, the endpoint preserves that session and returns {"success":true,"session_preserved":true} without processing the ticket or switching users. For guests, successful verification uses the existing identity resolver and normal Discourse `log_on_user`, returning `{"success":true}` and the Hub session cookie. Credential values are filtered from logs. Invalid users and expired tickets are rejected.
+
+Only this endpoint substitutes exact Origin plus signed short-lived credentials for a Hub CSRF token. Other endpoints retain normal CSRF. Offline verification means source IDP logout cannot invalidate an outstanding ticket before its short expiry. Coordinated logout is separate work; the device UUID stored in the server session is only an association.
+
+Ruby request and ticket-verifier specs require a full Discourse test runtime. Confirm real cross-origin cookie storage in the supported browsers before rollout.

@@ -1,5 +1,6 @@
 en:
   site_settings:
+    discourse_arz_tools_browser_login_enabled: "Enable direct Hub login using signed Accounts login tickets."
     discourse_arz_tools_enabled: "Enable the discourse-arz-tools plugin."
     discourse_arz_tools_chat_channel_message_counts_enabled: "Enable the cached chat channel message counts API."
     discourse_arz_tools_chat_channel_message_counts_cache_ttl_seconds: "How long fresh chat channel message counts stay cached, in seconds. Minimum is 12 hours."

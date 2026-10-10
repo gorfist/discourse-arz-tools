@@ -14,13 +14,18 @@ module ::DiscourseArzTools
 end
 
 after_initialize do
+  Rails.application.config.filter_parameters += [:code, :ticket, :hub_login_ticket]
   require_relative "app/controllers/discourse_arz_tools_topic_views_controller"
+  require_relative "lib/discourse_arz_tools/browser_login/ticket_verifier"
+  require_relative "app/controllers/discourse_arz_tools_browser_login_controller"
   require_relative "lib/discourse_arz_tools/webview_auth/idp_client"
   require_relative "lib/discourse_arz_tools/webview_auth/identity_resolver"
   require_relative "lib/discourse_arz_tools/webview_auth/request_authenticator"
 
   Discourse::Application.routes.append do
     post "/discourse-arz-tools/topic-view" => "discourse_arz_tools_topic_views#create"
+    match "/discourse-arz-tools/browser-login" => "discourse_arz_tools_browser_login#preflight", via: :options, defaults: { format: :json }
+    post "/discourse-arz-tools/browser-login" => "discourse_arz_tools_browser_login#create"
   end
 
   if defined?(::Chat::Engine)
