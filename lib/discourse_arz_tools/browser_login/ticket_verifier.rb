@@ -37,6 +37,10 @@ module ::DiscourseArzTools
         return nil unless identity.is_a?(Hash) && claims["sub"].is_a?(String) &&
           !claims["sub"].empty? && identity["external_id"].to_s == claims["sub"] &&
           identity["idp_device_id"].is_a?(String) && !identity["idp_device_id"].empty?
+        if identity.key?("hub_nonce")
+          nonce = identity["hub_nonce"]
+          return nil unless nonce.is_a?(String) && !nonce.empty? && nonce.bytesize <= 256
+        end
 
         identity
       rescue StandardError => error

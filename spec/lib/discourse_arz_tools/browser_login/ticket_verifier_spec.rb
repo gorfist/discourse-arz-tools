@@ -43,6 +43,14 @@ RSpec.describe DiscourseArzTools::BrowserLogin::TicketVerifier do
     expect(described_class.verify(sign(claims, { "alg" => "HS256", "typ" => "JWT" }))).to be_nil
   end
 
+  it "accepts a signed Hub nonce and rejects malformed nonces" do
+    bound_identity = identity.merge("hub_nonce" => "hub-nonce")
+    expect(described_class.verify(sign(claims.merge("identity" => bound_identity)))).to eq(bound_identity)
+    [nil, "", 42, "x" * 257].each do |nonce|
+      expect(described_class.verify(sign(claims.merge("identity" => identity.merge("hub_nonce" => nonce))))).to be_nil
+    end
+  end
+
 
   it "rejects malformed and oversized credentials" do
     [nil, "", "x.y.z", "x" * 16_385].each { |ticket| expect(described_class.verify(ticket)).to be_nil }

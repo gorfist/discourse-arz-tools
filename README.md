@@ -256,10 +256,18 @@ LOAD_PLUGINS=1 bundle exec rspec plugins/discourse-arz-tools/spec
 
 Enable `discourse_arz_tools_browser_login_enabled` and DiscourseConnect with a secret matching IDP's `DISCOURSE_SSO_SECRET`.
 
-Accounts sends `POST /discourse-arz-tools/browser-login.json` with JSON `{"ticket":"<signed ticket>"}` and browser credentials. OPTIONS supports the exact `https://accounts.arzdigital.com` origin, POST and Content-Type. No Hub iframe or IDP HTTP exchange is required. Accounts CSP must permit the Hub in connect-src; proxies must preserve CORS and Set-Cookie headers.
+Accounts sends `POST /discourse-arz-tools/browser-login` with JSON `{"ticket":"<signed ticket>"}` and browser credentials. OPTIONS supports the exact `https://accounts.arzdigital.com` origin, POST and Content-Type. No Hub iframe or IDP HTTP exchange is required. Accounts CSP must permit the Hub in connect-src; proxies must preserve CORS and Set-Cookie headers.
 
 The verifier checks the purpose-derived HS256 signature, issuer, Hub audience, 60-second expiry and identity binding. Ticket verification does not store or lock tickets; a valid ticket may be reused until expiry. If the browser already has an authenticated Hub user, the endpoint preserves that session and returns {"success":true,"session_preserved":true} without processing the ticket or switching users. For guests, successful verification uses the existing identity resolver and normal Discourse `log_on_user`, returning `{"success":true}` and the Hub session cookie. Credential values are filtered from logs. Invalid users and expired tickets are rejected.
 
 Only this endpoint substitutes exact Origin plus signed short-lived credentials for a Hub CSRF token. Other endpoints retain normal CSRF. Offline verification means source IDP logout cannot invalidate an outstanding ticket before its short expiry. Coordinated logout is separate work; the device UUID stored in the server session is only an association.
 
 Ruby request and ticket-verifier specs require a full Discourse test runtime. Confirm real cross-origin cookie storage in the supported browsers before rollout.
+
+### Hub-initiated browser form login
+
+With `discourse_connect_url=https://accounts.arzdigital.com/auth/login`, Accounts receives the original native signed SSO context. IDP returns a browser-login ticket containing the signed original `hub_nonce`. Accounts submits that ticket in the body of a top-level URL-encoded form POST to `/discourse-arz-tools/browser-login` (no `.json` suffix). The endpoint validates the native browser-session nonce, reads the saved return path, consumes the nonce and signs in the Accounts user. It returns HTTP 302 to the previous safe Hub path, or `/` if the path is unsafe. A foreground form can switch an existing Hub identity; background JSON synchronization continues to preserve it.
+
+Forms require a valid nonce-bound ticket; JSON authentication rejects nonce-bound tickets. Ticket URL parameters and the old `.json` route are rejected. Failed forms return an error page without arbitrary redirects. Accounts CSP must permit Hub in `form-action` as well as `connect-src`. Tickets are signed, not encrypted, and must not be logged in request bodies. No user identity is included in the navigation URL.
+
+The original IDP `/hub/v1/sso-start` and `/hub/v1/sso-continue` flow remains available. Restore `discourse_connect_url=https://idp.arzdigital.com/hub/v1/sso-start` to use it again. Verify real browser nonce handling, cookie creation and original-page navigation in a full Discourse deployment before rollout.

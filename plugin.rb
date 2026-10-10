@@ -24,8 +24,8 @@ after_initialize do
 
   Discourse::Application.routes.append do
     post "/discourse-arz-tools/topic-view" => "discourse_arz_tools_topic_views#create"
-    match "/discourse-arz-tools/browser-login" => "discourse_arz_tools_browser_login#preflight", via: :options, defaults: { format: :json }
-    post "/discourse-arz-tools/browser-login" => "discourse_arz_tools_browser_login#create"
+    match "/discourse-arz-tools/browser-login" => "discourse_arz_tools_browser_login#preflight", via: :options, format: false
+    post "/discourse-arz-tools/browser-login" => "discourse_arz_tools_browser_login#create", format: false
   end
 
   if defined?(::Chat::Engine)
