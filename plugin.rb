@@ -8,19 +8,28 @@
 # required_version: 3.3.0
 
 enabled_site_setting :discourse_arz_tools_enabled
+register_asset "stylesheets/common/arz-browser-logout.scss"
 
 module ::DiscourseArzTools
   PLUGIN_NAME = "discourse-arz-tools"
 end
 
 after_initialize do
+  Rails.application.config.filter_parameters += [:code, :ticket, :hub_login_ticket]
   require_relative "app/controllers/discourse_arz_tools_topic_views_controller"
+  require_relative "lib/discourse_arz_tools/browser_login/ticket_verifier"
+  require_relative "app/controllers/discourse_arz_tools_browser_login_controller"
+  require_relative "app/controllers/discourse_arz_tools_browser_logout_controller"
   require_relative "lib/discourse_arz_tools/webview_auth/idp_client"
   require_relative "lib/discourse_arz_tools/webview_auth/identity_resolver"
   require_relative "lib/discourse_arz_tools/webview_auth/request_authenticator"
 
   Discourse::Application.routes.append do
     post "/discourse-arz-tools/topic-view" => "discourse_arz_tools_topic_views#create"
+    match "/discourse-arz-tools/browser-login" => "discourse_arz_tools_browser_login#preflight", via: :options, format: false
+    post "/discourse-arz-tools/browser-login" => "discourse_arz_tools_browser_login#create", format: false
+    match "/discourse-arz-tools/browser-logout" => "discourse_arz_tools_browser_logout#preflight", via: :options, format: false
+    post "/discourse-arz-tools/browser-logout" => "discourse_arz_tools_browser_logout#destroy", format: false
   end
 
   if defined?(::Chat::Engine)

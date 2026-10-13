@@ -1,0 +1,42 @@
+.arz-browser-logout-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(0 0 0 / 50%);
+  cursor: wait;
+}
+
+.arz-browser-logout-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  max-width: 90vw;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  background: var(--secondary);
+  color: var(--primary);
+  text-align: center;
+
+  p { margin: 0; }
+}
+
+.arz-browser-logout-spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid var(--primary-low);
+  border-top-color: var(--tertiary);
+  border-radius: 50%;
+  animation: arz-browser-logout-spin 0.8s linear infinite;
+}
+
+@keyframes arz-browser-logout-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arz-browser-logout-spinner { animation: none; }
+}

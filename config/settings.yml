@@ -2,7 +2,7 @@ plugins:
   discourse_arz_tools_enabled:
     type: bool
     default: true
-    client: false
+    client: true
   discourse_arz_tools_chat_channel_message_counts_enabled:
     type: bool
     default: true
@@ -74,3 +74,17 @@ plugins:
     min: 1
     max: 10
     client: false
+  discourse_arz_tools_sync_login_enabled:
+    type: bool
+    default: false
+    client: false
+  discourse_arz_tools_sync_login_replace_existing_user:
+    type: bool
+    default: false
+    client: false
+  discourse_arz_tools_browser_logout_timeout_seconds:
+    type: integer
+    default: 30
+    min: 1
+    max: 120
+    client: true

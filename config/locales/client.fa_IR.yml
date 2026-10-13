@@ -1,0 +1,6 @@
+fa_IR:
+  js:
+    discourse_arz_tools:
+      browser_logout_loading: "در حال خروج از حساب کاربری…"
+      browser_logout_waiting: "خروج کامل از همهٔ سرویس‌ها تأیید نشد؛ صفحه به‌زودی تازه می‌شود…"
+      browser_logout_incomplete: "خروج کامل از همهٔ سرویس‌ها تأیید نشد. ممکن است در یکی از سرویس‌ها همچنان وارد باشید."

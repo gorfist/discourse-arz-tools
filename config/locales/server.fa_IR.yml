@@ -1,5 +1,8 @@
 fa_IR:
   site_settings:
+    discourse_arz_tools_browser_logout_timeout_seconds: "حداکثر زمان انتظار برای خروج هاب و اکانتس، بر حسب ثانیه؛ پس از این مهلت صفحه در هر شرایطی تازه می‌شود."
+    discourse_arz_tools_sync_login_enabled: "فعال کردن ورود خودکار هاب پس از ورود در اکانتس."
+    discourse_arz_tools_sync_login_replace_existing_user: "جایگزینی کاربر فعلی هاب با کاربر اکانتس در ورود خودکار. اگر غیرفعال باشد، کاربر فعلی هاب حفظ می شود. ورود صریح هاب تغییری نمی کند."
     discourse_arz_tools_enabled: "فعال کردن افزونه discourse-arz-tools."
     discourse_arz_tools_chat_channel_message_counts_enabled: "فعال کردن API کش شده شمارش پیام های کانال های گفتگو."
     discourse_arz_tools_chat_channel_message_counts_cache_ttl_seconds: "مدت زمان معتبر بودن شمارش تازه پیام های کانال های گفتگو در کش، بر حسب ثانیه. حداقل ۱۲ ساعت است."

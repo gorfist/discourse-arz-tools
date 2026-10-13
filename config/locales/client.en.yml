@@ -1,0 +1,6 @@
+en:
+  js:
+    discourse_arz_tools:
+      browser_logout_loading: "Signing out…"
+      browser_logout_waiting: "Sign-out from all services could not be confirmed; this page will refresh shortly…"
+      browser_logout_incomplete: "Sign-out from all services could not be confirmed. You may still be signed in to one of the services."
