@@ -25,50 +25,53 @@ class DiscourseArzToolsBrowserLoginController < ApplicationController
   end
 
   def create
-    form_login = request.media_type == "application/x-www-form-urlencoded"
-    return login_error(:unsupported_media_type, false) unless form_login || request.media_type == "application/json"
-    return login_error(:bad_request, form_login) if request.query_parameters.key?("ticket")
-    # Automatic synchronization must preserve an existing browser session.
-    if !form_login && current_user.present?
-      return render json: { success: true, session_preserved: true }
-    end
+    return login_error(:unsupported_media_type) unless request.media_type == "application/json"
+    return login_error(:bad_request) if request.query_parameters.key?("ticket")
     ticket = params[:ticket]
     unless ticket.is_a?(String) && ticket.bytesize <= 16_384
-      return login_error(:bad_request, form_login)
+      return login_error(:bad_request)
     end
     RateLimiter.new(nil, "arz-browser-login-#{request.remote_ip}", 60, 1.minute).performed!
     identity = ::DiscourseArzTools::BrowserLogin::TicketVerifier.verify(ticket)
-    return login_error(:unauthorized, form_login) if identity.nil?
+    return login_error(:unauthorized) if identity.nil?
 
     destination = nil
-    if form_login
+    explicit_login = identity.key?("hub_nonce")
+    if explicit_login
       nonce = identity["hub_nonce"]
-      return login_error(:bad_request, true) unless nonce.is_a?(String) && nonce.present?
+      return login_error(:bad_request) unless nonce.is_a?(String) && nonce.present?
       sso = DiscourseConnect.new(server_session: server_session)
       sso.nonce = nonce
-      return login_error(:conflict, true) unless sso.nonce_valid?
+      return login_error(:conflict) unless sso.nonce_valid?
       destination = safe_return_path(sso.return_path)
       # Consume before identity resolution or login can rotate the server session.
       sso.expire_nonce!
-    elsif identity.key?("hub_nonce")
-      # An explicit-login ticket must never bypass nonce verification via JSON.
-      return login_error(:bad_request, false)
+    elsif current_user.present? && !SiteSetting.discourse_arz_tools_sync_login_replace_existing_user
+      # Apply the current replacement policy when accepting the login ticket.
+      return render json: { success: true, session_preserved: true }
+    elsif current_user.present? && current_user_matches_identity?(identity)
+      # Same Accounts user: keep the session instead of issuing another auth token on every sync.
+      return render json: { success: true, session_preserved: true }
     end
 
     raise Discourse::ReadOnly if @readonly_mode && !@staff_writes_only_mode
-    return login_error(:forbidden, form_login) if ScreenedIpAddress.should_block?(request.remote_ip)
+    return login_error(:forbidden) if ScreenedIpAddress.should_block?(request.remote_ip)
 
     user = ::DiscourseArzTools::WebviewAuth::IdentityResolver.resolve(
       identity, ip: request.remote_ip, server_session: server_session,
     )
     raise Discourse::ReadOnly if @staff_writes_only_mode && !user&.staff?
     unless user&.active? && !user.suspended? && user.approved?
-      return login_error(:forbidden, form_login)
+      return login_error(:forbidden)
     end
+    # Replacing another browser session (explicit login or enabled replacement): end its
+    # Hub auth token like native logout so it does not stay valid until expiry. This runs
+    # only after every check passed, so a rejected ticket never logs anyone out.
+    log_off_user if current_user.present?
     log_on_user(user, replay_anonymous_action: true)
     server_session[:arz_idp_device_id] = identity["idp_device_id"]
-    if form_login
-      redirect_to destination, status: :found, allow_other_host: false
+    if explicit_login
+      render json: { success: true, redirect_url: "https://hub.arzdigital.com#{destination}" }
     else
       render json: { success: true }
     end
@@ -76,20 +79,14 @@ class DiscourseArzToolsBrowserLoginController < ApplicationController
 
   private
 
-  def login_error(status, form_login)
-    if form_login
-      # Use Discourse's themed error page for top-level browser navigation.
-      # Background synchronization must continue to receive JSON errors.
-      I18n.with_locale(:fa_IR) do
-        render html: build_not_found_page(
-          status: Rack::Utils.status_code(status),
-          layout: "no_ember",
-          custom_message: "discourse_arz_tools.browser_login_failed",
-        ), status: status
-      end
-    else
-      render json: { success: false }, status: status
-    end
+  def current_user_matches_identity?(identity)
+    external_id = identity["external_id"].to_s
+    external_id.present? &&
+      SingleSignOnRecord.where(user_id: current_user.id, external_id: external_id).exists?
+  end
+
+  def login_error(status)
+    render json: { success: false }, status: status
   end
 
   def safe_return_path(value)
@@ -115,6 +112,6 @@ class DiscourseArzToolsBrowserLoginController < ApplicationController
 
   def ensure_browser_login_enabled
     raise Discourse::NotFound unless SiteSetting.discourse_arz_tools_enabled &&
-      SiteSetting.discourse_arz_tools_browser_login_enabled && SiteSetting.enable_discourse_connect
+      SiteSetting.discourse_arz_tools_sync_login_enabled && SiteSetting.enable_discourse_connect
   end
 end

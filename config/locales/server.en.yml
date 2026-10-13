@@ -1,6 +1,8 @@
 en:
   site_settings:
-    discourse_arz_tools_browser_login_enabled: "Enable direct Hub login using signed Accounts login tickets."
+    discourse_arz_tools_browser_logout_timeout_seconds: "Maximum total seconds to wait for Hub and Accounts sign-out before refreshing the page unconditionally."
+    discourse_arz_tools_sync_login_enabled: "Enable direct Hub login using signed Accounts login tickets."
+    discourse_arz_tools_sync_login_replace_existing_user: "Replace the current Hub user with the Accounts user during automatic login synchronization. Disabled preserves existing Hub sessions. Explicit Hub login is unaffected."
     discourse_arz_tools_enabled: "Enable the discourse-arz-tools plugin."
     discourse_arz_tools_chat_channel_message_counts_enabled: "Enable the cached chat channel message counts API."
     discourse_arz_tools_chat_channel_message_counts_cache_ttl_seconds: "How long fresh chat channel message counts stay cached, in seconds. Minimum is 12 hours."
@@ -18,6 +20,5 @@ en:
     discourse_arz_tools_webview_auth_timeout_seconds: "Maximum seconds Hub waits for the IDP WebView identity response."
 
   discourse_arz_tools:
-    browser_login_failed: "Hub login failed. Please return to Hub and start login again."
     disabled: "The chat channel message counts API is disabled."
     chat_disabled: "Chat is disabled."
