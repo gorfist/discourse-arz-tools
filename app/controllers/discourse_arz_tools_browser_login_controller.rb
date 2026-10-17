@@ -61,9 +61,9 @@ class DiscourseArzToolsBrowserLoginController < ApplicationController
       identity, ip: request.remote_ip, server_session: server_session,
     )
     raise Discourse::ReadOnly if @staff_writes_only_mode && !user&.staff?
-    unless user&.active? && !user.suspended? && user.approved?
-      return login_error(:forbidden)
-    end
+    return login_error(:forbidden) unless user&.active? && !user.suspended?
+    # Match native DiscourseConnect: approval is required only when enabled.
+    return login_error(:forbidden) if SiteSetting.must_approve_users? && !user.approved?
     # Replacing another browser session (explicit login or enabled replacement): end its
     # Hub auth token like native logout so it does not stay valid until expiry. This runs
     # only after every check passed, so a rejected ticket never logs anyone out.

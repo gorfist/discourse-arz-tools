@@ -373,6 +373,68 @@ RSpec.describe DiscourseArzToolsBrowserLoginController do
     expect(cookies["_t"]).to be_blank
   end
 
+  [false, true].each do |explicit_login|
+    describe(explicit_login ? "explicit Hub login approval" : "automatic Hub login approval") do
+      before { start_hub_login("/latest") if explicit_login }
+
+      it "allows an unapproved user when approval is not required" do
+        SiteSetting.must_approve_users = false
+        user.update!(approved: false, approved_at: nil, approved_by_id: nil)
+
+        post path, params: { ticket: "ticket" }, headers: headers, as: :json
+
+        expect(response.status).to eq(200)
+        expect(response.parsed_body["success"]).to eq(true)
+        expect(cookies["_t"]).to be_present
+        expect(user.reload.approved?).to eq(false)
+        get "/session/current.json"
+        expect(response.parsed_body.dig("current_user", "id")).to eq(user.id)
+      end
+
+      it "rejects an unapproved user when approval is required" do
+        SiteSetting.must_approve_users = true
+        user.update!(approved: false, approved_at: nil, approved_by_id: nil)
+
+        post path, params: { ticket: "ticket" }, headers: headers, as: :json
+
+        expect(response.status).to eq(403)
+        expect(response.parsed_body).to eq("success" => false)
+        expect(cookies["_t"]).to be_blank
+      end
+
+      it "allows an approved user when approval is required" do
+        SiteSetting.must_approve_users = true
+        user.update!(approved: true)
+
+        post path, params: { ticket: "ticket" }, headers: headers, as: :json
+
+        expect(response.status).to eq(200)
+        expect(response.parsed_body["success"]).to eq(true)
+        expect(cookies["_t"]).to be_present
+      end
+
+      it "still rejects an inactive user when approval is not required" do
+        SiteSetting.must_approve_users = false
+        user.update!(active: false, approved: false)
+
+        post path, params: { ticket: "ticket" }, headers: headers, as: :json
+
+        expect(response.status).to eq(403)
+        expect(cookies["_t"]).to be_blank
+      end
+
+      it "still rejects a suspended user when approval is not required" do
+        SiteSetting.must_approve_users = false
+        user.update!(approved: false, suspended_till: 1.day.from_now)
+
+        post path, params: { ticket: "ticket" }, headers: headers, as: :json
+
+        expect(response.status).to eq(403)
+        expect(cookies["_t"]).to be_blank
+      end
+    end
+  end
+
   it "rejects disabled synchronization" do
     SiteSetting.discourse_arz_tools_sync_login_enabled = false
     post path, params: { ticket: "ticket" }, headers: headers, as: :json
