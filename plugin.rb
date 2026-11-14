@@ -15,6 +15,11 @@ module ::DiscourseArzTools
 end
 
 after_initialize do
+  require_relative "lib/discourse_arz_tools/request_log_tags"
+  unless ::Rails::Rack::Logger < ::DiscourseArzTools::RequestLogTags
+    ::Rails::Rack::Logger.prepend(::DiscourseArzTools::RequestLogTags)
+  end
+
   Rails.application.config.filter_parameters += [:code, :ticket, :hub_login_ticket]
   require_relative "app/controllers/discourse_arz_tools_topic_views_controller"
   require_relative "lib/discourse_arz_tools/browser_login/ticket_verifier"

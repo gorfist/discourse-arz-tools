@@ -7,6 +7,19 @@ Backend-only Discourse plugin with Arzdigital API utilities:
 
 Repository: https://github.com/gorfist/discourse-arz-tools
 
+## Request log correlation
+
+Existing Rails request log lines receive `[pid=123] [request_id=...]` tags. Match
+the PID to a worker timeout, then use the request ID to follow that request's
+Started, controller, and Completed log lines. Existing configured tags remain.
+
+This adds no new log lines, SQL/Redis calls, timers, or stack trace collection.
+The tags do add bytes to existing lines. They use Rails' existing request ID
+and process ID; the plugin does not log additional parameters, headers, or bodies.
+Tags are request-scoped and are removed by Rails on response close or failure.
+This diagnostic tagging is installed when the plugin loads, independently of
+the feature enable/disable site setting. It does not tag background job logs.
+
 ## Installation
 
 Add this plugin to your Discourse `app.yml`:
