@@ -127,6 +127,47 @@ ON chat_messages (chat_channel_id)
 WHERE deleted_at IS NULL;
 ```
 
+## Unread Chat Message Index
+
+Migration: [`20261114190000_add_arz_chat_unread_messages_index.rb`](db/migrate/20261114190000_add_arz_chat_unread_messages_index.rb).
+
+The November 14, 2026 Hub investigation found slow `Chat::ChannelUnreadsQuery`
+queries, including a 62.2-second execution near the 22:40 Tehran incident.
+A separate read-only reproduction exceeded its seven-second timeout.
+These timings describe the existing query, not a measured improvement from this index.
+
+The query supplies per-channel unread counts through `Chat::TrackingStateReportQuery`,
+including `GET /chat/api/me/channels` for signed-in users and some chat publisher
+updates. Its standalone-message count filters by channel, the user's last-read
+message ID, and messages that are neither deleted nor part of a thread:
+
+```sql
+SELECT COUNT(*)
+FROM chat_messages
+WHERE chat_channel_id = :channel_id
+  AND id > COALESCE(:last_read_message_id, 0)
+  AND deleted_at IS NULL
+  AND thread_id IS NULL;
+```
+
+The observed plan intersected separate channel and thread/message-ID indexes for
+this count, repeated across the user's channels. The new partial B-tree index
+`arz_idx_chat_messages_channel_id_id_unthreaded` places `(chat_channel_id, id)`
+together and includes only rows where `deleted_at IS NULL AND thread_id IS NULL`.
+This supports a channel-specific range scan after the read marker. The existing
+`(chat_channel_id, id)` index applies to **deleted** messages (`deleted_at IS NOT NULL`),
+so it cannot serve this predicate.
+
+The migration builds the index with `CONCURRENTLY`, outside a DDL transaction,
+and removes an invalid same-named index before retrying an interrupted build.
+Rollback drops only this index. Concurrent construction still consumes CPU and I/O.
+
+After deployment, check that the index is valid and compare the actual unread
+query with `EXPLAIN (ANALYZE, BUFFERS)` under a bounded statement timeout.
+Post-deployment performance has not been established by the investigation above.
+This index targets standalone unread counts; it does not address every chat
+notification query, search query, or establish a complete fix for the 503 incidents.
+
 ## API Topic Views
 
 This feature counts eligible API topic responses as topic views. It is based on the behavior from `gorfist/api-topic-views`, merged into `discourse-arz-tools` with request-side load controls.
